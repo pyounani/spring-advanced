@@ -1,30 +1,29 @@
-package pyounani.advanced.app.v3;
+package pyounani.advanced.trace.template;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import pyounani.advanced.trace.TraceId;
 import pyounani.advanced.trace.TraceStatus;
 import pyounani.advanced.trace.logtrace.LogTrace;
 
-@Service
 @RequiredArgsConstructor
-public class OrderServiceV3 {
+public abstract class AbstractTemplate<T> {
 
-    private final OrderRepositoryV3 orderRepository;
     private final LogTrace trace;
 
-    public void orderItem(String itemId) {
-
+    public T execute(String message) {
         TraceStatus status = null;
-
         try {
-            status = trace.begin("OrderService.orderItem()");
-            orderRepository.save(itemId);
+            status = trace.begin(message);
+
+            // 비즈니스 로직
+            T result = call();
+
             trace.end(status);
+            return result;
         } catch (Exception e) {
             trace.exception(status, e);
             throw e;
         }
-
     }
+
+    protected abstract T call();
 }
